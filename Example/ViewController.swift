@@ -34,8 +34,11 @@ class ViewController: UIViewController {
     }
 
     func doWork() {
+        let startTime = CACurrentMediaTime()
+
         networkService.getNextInput { input, error in
             if let error = error {
+                // No error handling for now, just log it and move on
                 NSLog("error: \(error)")
                 self.doWork()
                 return
@@ -47,11 +50,15 @@ class ViewController: UIViewController {
                 return
             }
 
-            let startPrime = CACurrentMediaTime()
+            // This is slow, but for a given input we always get the same output
+            // so we can cache the result.
             let result = BlackBox.process(input: input)
-            let finishPrime = CACurrentMediaTime()
-            let formattedTime = String(format: "%.2fms", (finishPrime - startPrime) * 1000)
-            NSLog("output: \(input) -> \(result) (\(formattedTime))")
+
+            let finishTime = CACurrentMediaTime()
+            let formattedTime = String(format: "%.2fms", (finishTime - startTime) * 1000)
+            NSLog("\(input) -> \(result) (\(formattedTime))")
+
+            // recurse to do more work
             self.doWork()
         }
     }
